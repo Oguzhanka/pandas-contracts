@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9, 3.10, 3.11]  # Test on multiple Python versions
+        pandas-version: ["1.3.5", "1.4.4", "1.5.3"]  # Test on multiple pandas versions
+        exclude:
+          - python-version: 3.7
+            pandas-version: "1.5.3"  # Exclude incompatible combinations if necessary
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ matrix.pandas-version }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install pandas==${{ matrix.pandas-version }}
+          pip install -r requirements.txt
+          pip install pytest flake8 black coverage codecov
+
+      - name: Run code quality checks
+        run: |
+          flake8 .
+          black --check .
+
+      - name: Run tests with coverage
+        run: |
+          coverage run -m pytest --maxfail=5 --disable-warnings
+
+      - name: Generate coverage report
+        run: |
+          coverage report
+          coverage xml
