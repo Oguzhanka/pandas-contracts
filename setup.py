@@ -6,8 +6,8 @@ setup(
     description="A helper library for validating and coercing pandas objects.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="Oguzhan Karaahmetoglu",
+    author_email="",
     url="https://github.com/Oguzhanka/pandas-contracts",
     packages=find_packages(),
     classifiers=[
